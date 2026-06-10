@@ -1,0 +1,10 @@
+debug/cmvcamera.o
+debug/control_window.o
+debug/main.o
+debug/mainwindow.o
+debug/mythread.o
+debug/open_window.o
+debug/moc_control_window.o
+debug/moc_mainwindow.o
+debug/moc_mythread.o
+debug/moc_open_window.o

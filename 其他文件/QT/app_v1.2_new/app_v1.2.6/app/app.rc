@@ -1,0 +1,4 @@
+#include "windows.h"
+
+// Use the ICO file located in the project directory
+IDI_ICON1 ICON "photo.ico"

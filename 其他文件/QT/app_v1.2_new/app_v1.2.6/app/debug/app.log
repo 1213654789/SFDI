@@ -1,0 +1,6 @@
+﻿   Qt/MSBuild: 3.5.0.0
+  Reading Qt configuration (D:/Qt/6.11.0/msvc2022_64/bin/qmake)
+   Qt: 6.11.0
+  control_window.cpp
+D:\ABB-Project\QT\app_v1.2_new\app_v1.2.6\app\control_window.cpp(97,17): warning C4189: “modeVal”: 局部变量已初始化但不引用
+  app.vcxproj -> D:\ABB-Project\QT\app_v1.2_new\app_v1.2.6\app\debug\app.exe

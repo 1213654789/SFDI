@@ -1,0 +1,10 @@
+release/cmvcamera.o
+release/control_window.o
+release/main.o
+release/mainwindow.o
+release/mythread.o
+release/open_window.o
+release/moc_control_window.o
+release/moc_mainwindow.o
+release/moc_mythread.o
+release/moc_open_window.o

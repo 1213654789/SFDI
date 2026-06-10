@@ -1,0 +1,7 @@
+根据日志分析，问题的根本原因是：在硬件触发模式下，MyThread 线程依然按照软件触发的方式运行——每次循环先调用 TriggerSoftware（软触发），再调用 ReadBuffer 读取图像。而硬件触发模式下相机应等待外部信号，主动调用 TriggerSoftware 会干扰相机状态，导致 ReadBuffer 始终返回 -1 失败。
+
+从日志可见：
+
+设置硬件触发后，TriggerMode = 1 (On), TriggerSource = 0 (Line0)。
+
+但 MyThread 持续输出 SoftTrigger: 0 和 ReadBuffer failed: -1，说明它仍在执行软触发命令。

@@ -1,0 +1,323 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "open_window.h"
+#include "QSerialPortInfo"
+#include <QSerialPort>
+#include <QMessageBox>
+#include <QDateTime>
+
+#include "qdebug.h"
+
+uint64_t k;
+
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+
+
+    QStringList serialNamePort;
+
+    serialPort = new QSerialPort(this);
+    connect(serialPort,SIGNAL(readyRead()),this,SLOT(manual_serialPortReadyRead()));/*手动连接槽函数*/
+
+    ui->serailCb->clear();
+    //通过QSerialPortInfo查找可用串口
+    foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    {
+        ui->serailCb->addItem(info.portName());
+    }
+
+    // 发送、接收计数清零
+    sendNum = 0;
+    recvNum = 0;
+    // 状态栏
+    QStatusBar *sBar = statusBar();
+    // 状态栏的收、发计数标签
+    lblSendNum = new QLabel(this);
+    lblRecvNum = new QLabel(this);
+
+    // 设置标签最小大小
+    lblSendNum->setMinimumSize(100, 30);
+    lblRecvNum->setMinimumSize(100, 30);
+    setNumOnLabel(lblSendNum, "S: ", sendNum);
+    setNumOnLabel(lblRecvNum, "R: ", recvNum);
+    // 从右往左依次添加
+    sBar->addPermanentWidget(lblSendNum);
+    sBar->addPermanentWidget(lblRecvNum);
+
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+
+
+
+//检测串口
+void MainWindow::on_btnSerialCheck_clicked()
+{
+    ui->serailCb->clear();
+    //通过QSerialPortInfo查找可用串口
+    foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    {
+        ui->serailCb->addItem(info.portName());
+    }
+}
+
+//打开串口
+void MainWindow::on_openBt_clicked()
+{
+    QSerialPort::BaudRate baudRate;
+    QSerialPort::DataBits dataBits;
+    QSerialPort::StopBits stopBits;
+    QSerialPort::Parity checkBits;
+
+    // 获取串口波特率
+    if(ui->baundrateCb->currentText()=="1200")
+        baudRate=QSerialPort::Baud1200;
+    else if(ui->baundrateCb->currentText()=="2400")
+        baudRate=QSerialPort::Baud2400;
+    else if(ui->baundrateCb->currentText()=="4800")
+        baudRate=QSerialPort::Baud4800;
+    else if(ui->baundrateCb->currentText()=="9600")
+        baudRate=QSerialPort::Baud9600;
+    else if(ui->baundrateCb->currentText()=="19200")
+        baudRate=QSerialPort::Baud19200;
+    else if(ui->baundrateCb->currentText()=="38400")
+        baudRate=QSerialPort::Baud38400;
+    else if(ui->baundrateCb->currentText()=="57600")
+        baudRate=QSerialPort::Baud57600;
+    else if(ui->baundrateCb->currentText()=="115200")
+        baudRate=QSerialPort::Baud115200;
+
+    // 获取串口数据位
+    if(ui->databitCb->currentText()=="5")
+        dataBits=QSerialPort::Data5;
+    else if(ui->databitCb->currentText()=="6")
+        dataBits=QSerialPort::Data6;
+    else if(ui->databitCb->currentText()=="7")
+        dataBits=QSerialPort::Data7;
+    else if(ui->databitCb->currentText()=="8")
+        dataBits=QSerialPort::Data8;
+
+    // 获取串口停止位
+    if(ui->stopbitCb->currentText()=="1")
+        stopBits=QSerialPort::OneStop;
+    else if(ui->stopbitCb->currentText()=="1.5")
+        stopBits=QSerialPort::OneAndHalfStop;
+    else if(ui->stopbitCb->currentText()=="2")
+        stopBits=QSerialPort::TwoStop;
+
+    // 获取串口奇偶校验位
+    if(ui->checkbitCb->currentText() == "none"){
+        checkBits = QSerialPort::NoParity;
+    }else if(ui->checkbitCb->currentText() == "奇校验"){
+        checkBits = QSerialPort::OddParity;
+    }else if(ui->checkbitCb->currentText() == "偶校验"){
+        checkBits = QSerialPort::EvenParity;
+    }else{
+
+    }
+
+    // 初始化串口属性，设置 端口号、波特率、数据位、停止位、奇偶校验位数
+    serialPort->setPortName(ui->serailCb->currentText());
+    serialPort->setBaudRate(baudRate);
+    serialPort->setDataBits(dataBits);
+    serialPort->setStopBits(stopBits);
+    serialPort->setParity(checkBits);
+
+    // 根据初始化好的串口属性，打开串口
+    // 如果打开成功，反转打开按钮显示和功能。打开失败，无变化，并且弹出错误对话框。
+    if(ui->openBt->text() == "打开串口"){
+    if(serialPort->open(QIODevice::ReadWrite) == true){
+       //QMessageBox::
+       ui->openBt->setText("关闭串口");
+       ui->openBt->setStyleSheet("color: red;");
+       // 让端口号下拉框不可选，避免误操作（选择功能不可用，控件背景为灰色）
+       ui->serailCb->setEnabled(false);
+    }else{
+       QMessageBox::critical(this, "错误提示", "串口打开失败！！！\r\n该串口可能被占用\r\n请选择正确的串口");
+    }
+    //statusBar 状态栏显示端口状态
+//    QString sm = "%1 OPENED, %2, 8, NONE, 1";
+//    QString status = sm.arg(serialPort->portName()).arg(serialPort->baudRate());
+    //lblPortState->setText(status);
+    //lblPortState->setStyleSheet("color:green");
+    }else{
+    serialPort->close();
+    ui->openBt->setText("打开串口");
+    ui->openBt->setStyleSheet("color: black;");
+    // 端口号下拉框恢复可选，避          免误操作
+    ui->serailCb->setEnabled(true);
+    //statusBar 状态栏显示端口状态
+//    QString sm = "%1 CLOSED";
+//    QString status = sm.arg(serialPort->portName());
+    //lblPortState->setText(status);
+    //lblPortState->setStyleSheet("color:red");
+    }
+}
+
+///////////////////////////////////后编辑代码///////////////////////////////////////
+///////////////
+/// \brief MainWindow::setSendEditText
+/// \param openwindow槽函数，自动写入文本并且按下发送按键
+///
+void MainWindow::setSendEditText(const QString &text)
+{
+    ui->sendEdit->setPlainText(text);   // 或 setText()，取决于实际控件类型
+    on_sendBt_clicked();
+}
+/////////////
+
+////////
+/// \brief MainWindow::refreshSerialPorts
+///串口连接函数
+
+void MainWindow::refreshSerialPorts()
+{
+    ui->serailCb->clear();
+    foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        ui->serailCb->addItem(info.portName());
+    }
+}
+
+void MainWindow::setCurrentSerialPort(const QString &portName)
+{
+    int index = ui->serailCb->findText(portName);
+    if (index != -1) {
+        ui->serailCb->setCurrentIndex(index);
+    }
+}
+
+QString MainWindow::getCurrentSerialPort() const
+{
+    return ui->serailCb->currentText();
+}
+/////////////////
+
+void MainWindow::openSerialPort()
+{
+    // 直接调用已有的槽函数（注意：该槽函数依赖界面控件的当前值）
+    on_openBt_clicked();
+}
+///////////////////////////////////后编辑代码///////////////////////////////////////
+
+
+//发送按键
+void MainWindow::on_sendBt_clicked()
+{
+    QByteArray array;
+    //Hex复选框
+    if(ui->chk_send_hex->checkState() == Qt::Checked){
+           //array = QString2Hex(data);  //HEX 16进制
+       array = QByteArray::fromHex(ui->sendEdit->toPlainText().toUtf8()).data();
+   }else{
+       //array = data.toLatin1();    //ASCII
+       array = ui->sendEdit->toPlainText().toLocal8Bit().data();
+   }
+
+   if(ui->chk_send_line->checkState() == Qt::Checked){
+       array.append("\r\n");
+   }
+    // 如发送成功，会返回发送的字节长度。失败，返回-1。
+    int a = serialPort->write(array);
+    // 发送字节计数并显示
+    if(a > 0)
+    {
+       // 发送字节计数
+       sendNum += a;
+       // 状态栏显示计数值
+       setNumOnLabel(lblSendNum, "S: ", sendNum);
+    }
+}
+
+//清空发送区域
+void MainWindow::on_btnClearSend_clicked()
+{
+
+    ui->sendEdit->clear();
+    // 清除发送字节计数
+    sendNum = 0;
+    // 状态栏显示计数值
+    setNumOnLabel(lblSendNum, "S: ", sendNum);
+}
+
+
+//手动实现接收数据函数
+void MainWindow::manual_serialPortReadyRead()
+{
+    QByteArray recBuf = serialPort->readAll();;
+    QString str_rev;
+
+    // 接收字节计数
+    recvNum += recBuf.size();
+    // 状态栏显示计数值
+    setNumOnLabel(lblRecvNum, "R: ", recvNum);
+
+    if(ui->chk_rev_hex->checkState() == false){
+        if(ui->chk_rev_line->checkState() == Qt::Checked){
+            str_rev = QString::fromUtf8(recBuf).append("\r\n");
+        }
+        else{
+            str_rev = QString::fromUtf8(recBuf);
+        }
+    }
+    else{
+
+        // 16进制显示，并转换为大写
+        QString str1 = recBuf.toHex().toUpper();//.data();
+        // 添加空格
+        QString str2;
+        for(int i = 0; i<str1.length (); i+=2)
+        {
+            str2 += str1.mid (i,2);
+            str2 += " ";
+        }
+//        if(ui->chk_rev_time->checkState() == Qt::Checked)
+//        {
+//            QDateTime nowtime = QDateTime::currentDateTime();
+//            str_rev = "[" + nowtime.toString("yyyy-MM-dd hh:mm:ss") + "] ";
+//            str_rev += str2.append("\r\n");
+//        }
+//        else
+//        {
+            if(ui->chk_rev_line->checkState() == Qt::Checked)
+                str_rev += str2.append("\r\n");
+            else
+                str_rev = str2;
+
+       // }
+    }
+    ui->recvEdit->insertPlainText(str_rev);
+    ui->recvEdit->moveCursor(QTextCursor::End);
+
+}
+
+//清空接收区域
+void MainWindow::on_pushButton_clicked()
+{
+    ui->recvEdit->clear();
+   // 清除发送、接收字节计数
+   sendNum = 0;
+   recvNum = 0;
+   // 状态栏显示计数值
+   setNumOnLabel(lblSendNum, "S: ", sendNum);
+   setNumOnLabel(lblRecvNum, "R: ", recvNum);
+}
+
+
+
+//底部标签显示
+void MainWindow::setNumOnLabel(QLabel *lbl, QString strS, long num)
+{
+    // 标签显示
+    QString strN;
+    strN.asprintf("%ld", num);
+    QString str = strS + strN;
+    lbl->setText(str);
+}
+

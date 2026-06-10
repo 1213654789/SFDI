@@ -1,0 +1,2 @@
+D:\qt-project\app_v1.0.3\app\debug\app.exe
+D:\ABB-Project\QT\app_v1.0\app_v1.0.4\app\debug\app.exe

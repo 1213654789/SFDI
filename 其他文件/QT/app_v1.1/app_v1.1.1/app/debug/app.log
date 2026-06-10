@@ -1,0 +1,4 @@
+﻿   Qt/MSBuild: 3.5.0.0
+  Reading Qt configuration (D:/Qt/6.11.0/msvc2022_64/bin/qmake)
+   Qt: 6.11.0
+  app.vcxproj -> D:\ABB-Project\QT\app_v1.1\app_v1.1.1\app\debug\app.exe

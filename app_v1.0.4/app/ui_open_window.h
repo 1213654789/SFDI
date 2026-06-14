@@ -242,7 +242,7 @@ public:
 
     void retranslateUi(QMainWindow *mainWindow)
     {
-        mainWindow->setWindowTitle(QCoreApplication::translate("mainWindow", "\350\247\246\345\217\221\350\275\257\344\273\266", nullptr));
+        mainWindow->setWindowTitle(QCoreApplication::translate("mainWindow", "Serial Port Assistant", nullptr));
         action->setText(QCoreApplication::translate("mainWindow", "\345\205\263\344\272\216", nullptr));
         open_btnSerialCheck->setText(QCoreApplication::translate("mainWindow", "\345\210\267\346\226\260", nullptr));
         open_openBt->setText(QCoreApplication::translate("mainWindow", "\350\277\236\346\216\245", nullptr));

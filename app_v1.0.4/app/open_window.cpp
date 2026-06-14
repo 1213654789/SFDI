@@ -9,6 +9,8 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QFont>
+#include <QCloseEvent>
+#include <QApplication>
 
 int a = 0;
 
@@ -27,6 +29,17 @@ open_window::open_window(QWidget *parent) :
 
 open_window::~open_window()
 {
+    // Ensure we properly delete the child main window and close any resources
+    if (mainWin) {
+        // Close serial port if open
+        if (mainWin->serialPort && mainWin->serialPort->isOpen()) {
+            mainWin->serialPort->close();
+            qDebug() << "serialPort closed in open_window destructor";
+        }
+        mainWin->close();
+        delete mainWin;
+        mainWin = nullptr;
+    }
     delete ui;
 }
 
@@ -155,5 +168,25 @@ void open_window::on_action_triggered()
     layout->addWidget(label);
     dlg.setLayout(layout);
     dlg.exec();
+}
+
+
+void open_window::closeEvent(QCloseEvent *event)
+{
+    qDebug() << "open_window::closeEvent called";
+    // Close and delete child window if present
+    if (mainWin) {
+        if (mainWin->serialPort && mainWin->serialPort->isOpen()) {
+            mainWin->serialPort->close();
+            qDebug() << "serialPort closed in open_window::closeEvent";
+        }
+        mainWin->close();
+        delete mainWin;
+        mainWin = nullptr;
+    }
+
+    // Ensure application quits
+    QApplication::quit();
+    QMainWindow::closeEvent(event);
 }
 

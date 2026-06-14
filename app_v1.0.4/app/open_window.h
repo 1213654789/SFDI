@@ -36,6 +36,8 @@ private slots:
 private:
     Ui::mainWindow *ui;
     MainWindow *mainWin = nullptr; // 声明 MainWindow 指针
+protected:
+    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // OPEN_WINDOW_H

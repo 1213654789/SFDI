@@ -1,0 +1,9 @@
+2026-06-14 20:16:09.479 [DEBUG] Application starting
+2026-06-14 20:16:09.485 [DEBUG] Current working directory: "D:/ABB-Project/app_v1.0.4/app"
+2026-06-14 20:16:10.029 [DEBUG] QPA platform: "windows"
+2026-06-14 20:16:10.165 [WARN]  QMetaObject::connectSlotsByName: No matching signal for on_open_serailCb_currentIndexChanged(QString)
+2026-06-14 20:54:31.100 [DEBUG] Application starting
+2026-06-14 20:54:31.101 [DEBUG] Current working directory: "D:/ABB-Project/app_v1.0.4/app"
+2026-06-14 20:54:31.160 [DEBUG] QPA platform: "windows"
+2026-06-14 20:54:31.341 [WARN]  QMetaObject::connectSlotsByName: No matching signal for on_open_serailCb_currentIndexChanged(QString)
+2026-06-14 20:54:32.596 [DEBUG] open_window::closeEvent called

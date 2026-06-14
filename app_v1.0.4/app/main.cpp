@@ -7,7 +7,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-//    MainWindow w;
+    a.setWindowIcon(QIcon(":/photo.ico"));   // 统一设置图标（需将 app.ico 加入资源文件）
+    //    MainWindow w;
     open_window w;
     w.show();
 

@@ -51,6 +51,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    // Ensure serial port is closed when the window is destroyed to avoid
+    // leaving OS resources open that may keep the process alive.
+    if (serialPort) {
+        if (serialPort->isOpen()) {
+            serialPort->close();
+            qDebug() << "serialPort closed in MainWindow destructor";
+        }
+    }
     delete ui;
 }
 

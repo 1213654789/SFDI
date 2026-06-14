@@ -1,4 +1,11 @@
 # SFDI
+
+上位机采用QT6编写<br>
+单片机采用STM32F103C8T6<br>
+CubeMX生成HAL库底层代码<br>
+采用Keil平台编写单片机代码<br>
+系统运行在Windows11环境
+
 ## app_V1.04
 此文件夹为触发控制软件<br>
 <div align="center">
